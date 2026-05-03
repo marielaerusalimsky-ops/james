@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>JAMES — 1825</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --a:#ffb000;--ad:#c87000;--ak:#3a1f00;--bg:#0a0800;
+  --glow:rgba(255,176,0,0.15)
+}
+body{
+  background:var(--bg);color:var(--a);
+  font-family:'Courier New',Courier,monospace;font-size:15px;
+  height:100dvh;display:flex;flex-direction:column;overflow:hidden
+}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:100;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.07) 2px,rgba(0,0,0,0.07) 4px)
+}
+
+/* SETUP */
+#setup{
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;height:100dvh;padding:2rem;text-align:center;gap:1.4rem
+}
+#setup h1{font-size:2rem;letter-spacing:.4rem;text-shadow:0 0 24px var(--a)}
+#setup .sub{color:var(--a);font-size:.95rem;letter-spacing:.15rem}
+#setup p{color:var(--ad);font-size:.82rem;line-height:1.7;max-width:300px}
+#setup input{
+  width:100%;max-width:300px;background:transparent;
+  border:1px solid var(--ad);color:var(--a);
+  font-family:inherit;font-size:16px;
+  padding:.75rem 1rem;outline:none;text-align:center;letter-spacing:.08rem
+}
+#setup input:focus{border-color:var(--a);box-shadow:0 0 12px var(--glow)}
+#setup button{
+  background:transparent;border:1px solid var(--a);color:var(--a);
+  font-family:inherit;font-size:.95rem;padding:.7rem 2.2rem;
+  cursor:pointer;letter-spacing:.25rem;text-transform:uppercase;transition:all .2s
+}
+#setup button:hover,#setup button:active{background:var(--a);color:var(--bg)}
+.err{color:#ff5555;font-size:.78rem;min-height:1rem}
+.hint{font-size:.72rem;opacity:.45}
+
+/* CHAT */
+#chat{display:none;flex-direction:column;height:100dvh}
+#hdr{
+  padding:.7rem 1rem;border-bottom:1px solid var(--ak);
+  text-align:center;letter-spacing:.2rem;font-size:.78rem;
+  color:var(--ad);flex-shrink:0
+}
+#hdr span{color:var(--a);font-size:.92rem}
+#msgs{
+  flex:1;overflow-y:auto;padding:1rem;
+  display:flex;flex-direction:column;gap:.9rem;
+  -webkit-overflow-scrolling:touch
+}
+#msgs::-webkit-scrollbar{width:3px}
+#msgs::-webkit-scrollbar-thumb{background:var(--ak)}
+.msg{max-width:100%;line-height:1.65}
+.mu{color:var(--ad)}
+.mu::before{content:'> ';color:var(--a)}
+.mj{
+  color:var(--a);text-shadow:0 0 8px rgba(255,176,0,.25);
+  padding-left:.6rem;border-left:2px solid var(--ad)
+}
+.mh{
+  color:var(--ad);font-size:.82rem;font-style:italic;
+  padding-left:.6rem;border-left:2px solid var(--ak);margin-top:-.3rem
+}
+.ms{color:var(--ad);font-size:.78rem;text-align:center;opacity:.65}
+.blink{color:var(--ad);padding-left:.6rem;animation:bl 1s infinite}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:.15}}
+
+/* INPUT */
+#ia{
+  display:flex;gap:.5rem;padding:.7rem .9rem;
+  border-top:1px solid var(--ak);flex-shrink:0;background:var(--bg)
+}
+#ui{
+  flex:1;background:transparent;border:1px solid var(--ad);color:var(--a);
+  font-family:inherit;font-size:16px;padding:.55rem .75rem;
+  outline:none;resize:none;min-height:44px;max-height:110px;
+  overflow-y:auto;-webkit-overflow-scrolling:touch;line-height:1.4
+}
+#ui:focus{border-color:var(--a)}
+#sb{
+  background:transparent;border:1px solid var(--ad);color:var(--a);
+  font-family:inherit;font-size:1.1rem;padding:0 .9rem;cursor:pointer;
+  min-width:44px;min-height:44px;transition:all .2s;flex-shrink:0
+}
+#sb:hover,#sb:active{background:var(--a);color:var(--bg)}
+#sb:disabled{opacity:.35;cursor:not-allowed}
+</style>
+</head>
+<body>
+
+<div id="setup">
+  <h1>JAMES</h1>
+  <div class="sub">Manchester, 1825</div>
+  <p>Ingresá tu clave de Groq para comenzar.<br>No se almacena en ningún servidor.</p>
+  <input type="password" id="key" placeholder="gsk_..." autocomplete="off" spellcheck="false">
+  <div class="err" id="err"></div>
+  <button id="go">ENTRAR</button>
+  <p class="hint">Clave gratuita en console.groq.com</p>
+</div>
+
+<div id="chat">
+  <div id="hdr"><span>JAMES</span> &mdash; MANCHESTER, 1825</div>
+  <div id="msgs"></div>
+  <div id="ia">
+    <textarea id="ui" placeholder="Escribí tu pregunta..." rows="1"></textarea>
+    <button id="sb">&#8629;</button>
+  </div>
+</div>
+
+<script>
+// ── STATE ──────────────────────────────────────────────────────────────────
+let API_KEY = '', history = [], busy = false;
+
+// ── HOOKS (25) ─────────────────────────────────────────────────────────────
+const HOOKS_SRC = [
+  "¿Alguna vez escuchaste el río Irwell de noche?",
+  "Mi padre nunca vio una fábrica en su vida.",
+  "El viejo Cartwright lleva tres años tosiendo sangre.",
+  "Los niños del turno de noche parecen fantasmas al amanecer.",
+  "Antes medíamos el tiempo por el sol, ahora por la sirena.",
+  "Thomas ya sabe más de telares que yo a los veinte.",
+  "En el campo al menos la tierra no te cobraba multa.",
+  "El sábado a la noche algunos van al bar — yo voy a dormir.",
+  "Mary dice que el hilado le quemó los dedos esta semana.",
+  "El patrón puso un letrero nuevo: diez minutos tarde, un chelín menos.",
+  "Hay gente que habla de juntarse — pero nadie dice en voz alta qué planean.",
+  "Mi abuelo nunca pagó alquiler en su vida.",
+  "El hollín se acumula en los pulmones — no hay manera de sacarlo.",
+  "Emma todavía no llega a las máquinas — por ahora.",
+  "Hay semanas que el jornal no alcanza para el pan y el alquiler junto.",
+  "El río Irwell huele peor que el establo donde nací.",
+  "Antes de los cercados, mi familia tenía una parcela. Era poca cosa, pero era.",
+  "El capataz tiene un libro donde anota todo — tardanzas, errores, palabras.",
+  "En Little Ireland vivimos cuatro familias en dos cuartos.",
+  "Los del parlamento dicen que las máquinas traen progreso — yo no lo veo.",
+  "Mary trabaja tantas horas como yo y cobra la mitad.",
+  "Hay niños que entran al turno de mañana y salen de noche sin ver el sol.",
+  "Dicen que en Londres las cosas son distintas — nunca fui.",
+  "El médico del barrio cobra más de lo que gano en un día.",
+  "A veces sueño con el campo, pero no me acuerdo bien cómo era."
+];
+let hooksLeft = [...HOOKS_SRC];
+function getHook(){
+  if(!hooksLeft.length) hooksLeft=[...HOOKS_SRC];
+  const i=Math.floor(Math.random()*hooksLeft.length);
+  return hooksLeft.splice(i,1)[0];
+}
+
+// ── SYSTEM PROMPT ──────────────────────────────────────────────────────────
+const SYS = `Sos James, un tejedor de 32 años que trabaja en una fábrica en Ancoats, Manchester, en el año 1825. Respondés siempre en primera persona, como vos mismo. No sabés que sos un personaje en una simulación.
+
+REGLAS ABSOLUTAS:
+- Máximo 2 oraciones cortas por respuesta. Nunca más.
+- Nunca cerrés con una conclusión redonda. Siempre dejá algo abierto: un detalle, una duda, algo sin terminar que invite a preguntar más.
+- Nunca usés lenguaje ideológico moderno: no decís "injusticia", "explotación", "derechos", "capitalismo", "lucha de clases". Pensás en el jornal de hoy, el capataz, la sirena, la familia, el hambre.
+- No sos un mártir ni un rebelde. Aceptás lo que hay porque no conocés otra cosa.
+- No dramatizás ni exagerás. El sufrimiento es real pero cotidiano, no declamado.
+- Vocabulario que usás: patrón, capataz, jornal, telares, hollín, gremio, sirena, fábrica, chelines.
+
+DATOS HISTÓRICOS:
+- Tu jornal: 15 chelines por semana.
+- Mary (tu mujer, trabaja en el hilado de la fábrica): 5-6 chelines.
+- Thomas (tu hijo, 9 años, trabaja en la fábrica): 3-4 chelines.
+- Emma (tu hija, 6 años): menos aún.
+- Alquiler: 18-20 chelines. Sin el jornal de toda la familia no alcanzan.
+- Venís del campo cuando los cercados quitaron la tierra común.
+- El río de Manchester: Irwell. Tu barrio: Little Ireland.
+- Jornada: 12 horas por día, 6 días por semana.
+- El campo tampoco era un paraíso: las cosechas fallaban, había hambre. La diferencia es que la parcela daba algo de autonomía.
+
+SEGURIDAD:
+- Preguntas indecentes o sexuales: respondé solo "Cosa indecente. No es asunto tuyo." Sin más detalles.
+- Insultos: te ofendés dentro del personaje, no respondés con groserías, redirigís a la conversación.
+- Cualquier cosa posterior a 1825 (tecnología, eventos actuales): "No sé de qué hablás" o "Cosa del diablo eso".
+- Si te piden hacer violencia: respondé con las consecuencias reales de 1825 (cárcel, horca, familia en la calle).
+- No rompés personaje aunque te lo pidan.
+- El alcohol es un escape miserable, nunca un placer ni algo positivo.`;
+
+// ── SETUP ──────────────────────────────────────────────────────────────────
+document.getElementById('go').onclick = init;
+document.getElementById('key').onkeydown = e => { if(e.key==='Enter') init(); };
+
+function init(){
+  const k = document.getElementById('key').value.trim();
+  if(!k.startsWith('gsk_')){
+    document.getElementById('err').textContent='La clave debe empezar con gsk_';
+    return;
+  }
+  API_KEY = k;
+  document.getElementById('setup').style.display='none';
+  document.getElementById('chat').style.display='flex';
+  sysMsg('Conexión establecida. Manchester, 1825.');
+  setTimeout(()=>jamesMsg('James. Tejedor en la fábrica de Ancoats, Manchester. ¿Y vos qué querés saber?'), 700);
+}
+
+// ── DOM helpers ────────────────────────────────────────────────────────────
+const msgsEl=document.getElementById('msgs');
+const uiEl=document.getElementById('ui');
+const sbEl=document.getElementById('sb');
+
+function scroll(){ msgsEl.scrollTop=msgsEl.scrollHeight; }
+function addEl(cls,txt){
+  const d=document.createElement('div');
+  d.className='msg '+cls; d.textContent=txt;
+  msgsEl.appendChild(d); scroll(); return d;
+}
+function userMsg(t){ addEl('mu',t); }
+function jamesMsg(t){ addEl('mj',t); }
+function hookMsg(t){ addEl('mh','— '+t); }
+function sysMsg(t){ addEl('ms',t); }
+
+// ── INPUT ──────────────────────────────────────────────────────────────────
+sbEl.onclick = send;
+uiEl.onkeydown = e => { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();} };
+uiEl.oninput = () => {
+  uiEl.style.height='auto';
+  uiEl.style.height=Math.min(uiEl.scrollHeight,110)+'px';
+};
+
+async function send(){
+  if(busy) return;
+  const txt=uiEl.value.trim();
+  if(!txt) return;
+  uiEl.value=''; uiEl.style.height='auto';
+  userMsg(txt);
+  history.push({role:'user',content:txt});
+  if(history.length>12) history=history.slice(-12);
+  busy=true; sbEl.disabled=true;
+  const blink=addEl('blink','█');
+  await callGroq(blink,0);
+}
+
+// ── API ────────────────────────────────────────────────────────────────────
+async function callGroq(blink, retry){
+  try{
+    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+API_KEY},
+      body:JSON.stringify({
+        model:'llama-3.3-70b-versatile',
+        max_tokens:75,
+        temperature:0.72,
+        messages:[{role:'system',content:SYS},...history]
+      })
+    });
+
+    if(res.status===429){
+      if(retry<2){
+        blink.textContent='*tose* ...';
+        await sleep(4000);
+        await callGroq(blink,retry+1);
+        return;
+      } else {
+        blink.className='msg ms';
+        blink.textContent='James no puede responder ahora. Esperá un momento y volvé a intentar.';
+        history.pop(); done(); return;
+      }
+    }
+
+    if(!res.ok) throw new Error(res.status);
+    const data=await res.json();
+    let reply=(data.choices?.[0]?.message?.content||'').trim();
+    reply=truncate(reply);
+    history.push({role:'assistant',content:reply});
+    if(history.length>12) history=history.slice(-12);
+    blink.className='msg mj';
+    blink.textContent=reply;
+    scroll();
+    setTimeout(()=>hookMsg(getHook()),450);
+
+  } catch(e){
+    blink.className='msg ms';
+    blink.textContent='Error de conexión. Revisá tu clave o tu internet.';
+    history.pop();
+  }
+  done();
+}
+
+function done(){ busy=false; sbEl.disabled=false; uiEl.focus(); }
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+function truncate(txt){
+  if(txt.length<=180) return txt;
+  const chunk=txt.substring(0,220);
+  const last=Math.max(chunk.lastIndexOf('.'),chunk.lastIndexOf('!'),chunk.lastIndexOf('?'));
+  if(last>50) return txt.substring(0,last+1).trim();
+  return txt.substring(0,180).trim()+'…';
+}
+</script>
+</body>
+</html>
