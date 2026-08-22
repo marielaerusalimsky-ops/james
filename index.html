@@ -496,10 +496,11 @@ function enviar() {
       'Authorization': 'Bearer ' + keyUsada
     },
     body: JSON.stringify({
-      model: 'qwen/qwen3.6-27b',
+      model: 'qwen/qwen3-32b',
       messages: msgs,
       temperature: 0.9,
-      max_tokens: 150
+      max_tokens: 150,
+      reasoning_format: 'hidden'
     })
   })
   .then(function(res){ return res.json(); })
