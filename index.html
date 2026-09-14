@@ -486,7 +486,7 @@ function enviar() {
   loader.style.display = 'flex';
   fstatus.textContent = '...';
 
-  var msgs = [{ role: 'system', content: getSistema() }].concat(conversacion.slice(-10));
+  var msgs = [{ role: 'system', content: getSistema() }].concat(conversacion.slice(-6));
   var keyUsada = getKey();
 
   fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -496,10 +496,11 @@ function enviar() {
       'Authorization': 'Bearer ' + keyUsada
     },
     body: JSON.stringify({
-      model: 'qwen/qwen3-32b',
+      model: 'openai/gpt-oss-20b',
       messages: msgs,
-      temperature: 0.9,
-      max_tokens: 150,
+      temperature: 1.0,
+      max_tokens: 600,
+      reasoning_effort: 'low',
       reasoning_format: 'hidden'
     })
   })
