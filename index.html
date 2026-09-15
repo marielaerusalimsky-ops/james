@@ -2,569 +2,301 @@
 <html lang="es">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<title>James — Manchester 1825</title>
-<link href="https://fonts.googleapis.com/css2?family=Special+Elite&family=VT323&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>JAMES — 1825</title>
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-:root {
-  --amber: #c8860a;
-  --amber-bright: #ffb000;
-  --amber-dim: #5a3a06;
-  --amber-pale: #3a2004;
-  --green: #1aff80;
-  --green-dim: #0a7a3a;
-  --bg: #060500;
-  --bg2: #0d0a04;
-  --bg3: #151008;
-  --border: #2a1c06;
-  --border-bright: #3a2a0a;
-  --text-james: #d4a84a;
-  --text-user: #1aff80;
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --a:#ffb000;--ad:#c87000;--ak:#3a1f00;--bg:#0a0800;
+  --glow:rgba(255,176,0,0.15)
+}
+body{
+  background:var(--bg);color:var(--a);
+  font-family:'Courier New',Courier,monospace;font-size:15px;
+  height:100dvh;display:flex;flex-direction:column;overflow:hidden
+}
+body::before{
+  content:'';position:fixed;inset:0;pointer-events:none;z-index:100;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.07) 2px,rgba(0,0,0,0.07) 4px)
 }
 
-html, body {
-  height: 100%;
-  height: 100dvh;
-  background: var(--bg);
-  font-family: 'Courier New', monospace;
-  overflow: hidden;
-  -webkit-font-smoothing: antialiased;
+/* SETUP */
+#setup{
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;height:100dvh;padding:2rem;text-align:center;gap:1.4rem
 }
+#setup h1{font-size:2rem;letter-spacing:.4rem;text-shadow:0 0 24px var(--a)}
+#setup .sub{color:var(--a);font-size:.95rem;letter-spacing:.15rem}
+#setup p{color:var(--ad);font-size:.82rem;line-height:1.7;max-width:300px}
+#setup input{
+  width:100%;max-width:300px;background:transparent;
+  border:1px solid var(--ad);color:var(--a);
+  font-family:inherit;font-size:16px;
+  padding:.75rem 1rem;outline:none;text-align:center;letter-spacing:.08rem
+}
+#setup input:focus{border-color:var(--a);box-shadow:0 0 12px var(--glow)}
+#setup button{
+  background:transparent;border:1px solid var(--a);color:var(--a);
+  font-family:inherit;font-size:.95rem;padding:.7rem 2.2rem;
+  cursor:pointer;letter-spacing:.25rem;text-transform:uppercase;transition:all .2s
+}
+#setup button:hover,#setup button:active{background:var(--a);color:var(--bg)}
+.err{color:#ff5555;font-size:.78rem;min-height:1rem}
+.hint{font-size:.72rem;opacity:.45}
 
-body::after {
-  content: '';
-  position: fixed; inset: 0;
-  background: repeating-linear-gradient(
-    0deg, transparent, transparent 3px,
-    rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px
-  );
-  pointer-events: none; z-index: 9999;
+/* CHAT */
+#chat{display:flex;flex-direction:column;height:100dvh}
+#hdr{
+  padding:.7rem 1rem;border-bottom:1px solid var(--ak);
+  text-align:center;letter-spacing:.2rem;font-size:.78rem;
+  color:var(--ad);flex-shrink:0
 }
+#hdr span{color:var(--a);font-size:.92rem}
+#msgs{
+  flex:1;overflow-y:auto;padding:1rem;
+  display:flex;flex-direction:column;gap:.9rem;
+  -webkit-overflow-scrolling:touch
+}
+#msgs::-webkit-scrollbar{width:3px}
+#msgs::-webkit-scrollbar-thumb{background:var(--ak)}
+.msg{max-width:100%;line-height:1.65}
+.mu{color:var(--ad)}
+.mu::before{content:'> ';color:var(--a)}
+.mj{
+  color:var(--a);text-shadow:0 0 8px rgba(255,176,0,.25);
+  padding-left:.6rem;border-left:2px solid var(--ad)
+}
+.mh{
+  color:var(--ad);font-size:.82rem;font-style:italic;
+  padding-left:.6rem;border-left:2px solid var(--ak);margin-top:-.3rem
+}
+.ms{color:var(--ad);font-size:.78rem;text-align:center;opacity:.65}
+.blink{color:var(--ad);padding-left:.6rem;animation:bl 1s infinite}
+@keyframes bl{0%,100%{opacity:1}50%{opacity:.15}}
 
-/* -- HEADER -- */
-#header {
-  flex-shrink: 0;
-  background: linear-gradient(180deg, #0a0700 0%, var(--bg) 100%);
-  border-bottom: 1px solid var(--border-bright);
-  padding: 10px 16px 8px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 2px 20px rgba(200,134,10,0.08);
+/* INPUT */
+#ia{
+  display:flex;gap:.5rem;padding:.7rem .9rem;
+  border-top:1px solid var(--ak);flex-shrink:0;background:var(--bg)
 }
-
-.header-left h1 {
-  font-family: 'Special Elite', cursive;
-  color: var(--amber);
-  font-size: 1.05rem;
-  letter-spacing: 4px;
-  text-transform: uppercase;
-  font-weight: 400;
-  text-shadow: 0 0 20px rgba(200,134,10,0.4);
+#ui{
+  flex:1;background:transparent;border:1px solid var(--ad);color:var(--a);
+  font-family:inherit;font-size:16px;padding:.55rem .75rem;
+  outline:none;resize:none;min-height:44px;max-height:110px;
+  overflow-y:auto;-webkit-overflow-scrolling:touch;line-height:1.4
 }
-
-.header-left p {
-  font-family: 'VT323', monospace;
-  color: #3a2a0a;
-  font-size: 0.65rem;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  margin-top: 1px;
+#ui:focus{border-color:var(--a)}
+#sb{
+  background:transparent;border:1px solid var(--ad);color:var(--a);
+  font-family:inherit;font-size:1.1rem;padding:0 .9rem;cursor:pointer;
+  min-width:44px;min-height:44px;transition:all .2s;flex-shrink:0
 }
-
-.status-pill {
-  display: flex; align-items: center; gap: 5px;
-  background: #051005;
-  border: 1px solid #0a2a0a;
-  padding: 4px 9px;
-  border-radius: 2px;
-}
-.sdot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: #22c55e;
-  box-shadow: 0 0 8px #22c55e;
-  animation: pulse 2s infinite;
-}
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }
-.stxt {
-  font-family: 'VT323', monospace;
-  color: #22c55e; font-size: 0.62rem;
-  letter-spacing: 1px; text-transform: uppercase;
-}
-
-/* -- CONTEXT STRIP -- */
-#ctx {
-  flex-shrink: 0;
-  background: #08060200;
-  border-bottom: 1px solid var(--border);
-  padding: 4px 16px;
-  display: flex; gap: 14px;
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-}
-#ctx::-webkit-scrollbar { display: none; }
-.ci {
-  font-family: 'VT323', monospace;
-  font-size: 0.62rem; letter-spacing: 1px;
-  text-transform: uppercase; color: #2a1c06;
-  white-space: nowrap;
-}
-.ci b { color: #4a2e08; font-weight: 400; }
-
-/* -- INTRO BANNER -- */
-#intro {
-  flex-shrink: 0;
-  background: linear-gradient(90deg, transparent, rgba(200,134,10,0.04), transparent);
-  border-bottom: 1px solid var(--border);
-  padding: 8px 16px;
-  text-align: center;
-}
-#intro p {
-  font-family: 'VT323', monospace;
-  color: #3a2a08;
-  font-size: 0.68rem;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  line-height: 1.4;
-}
-
-/* -- CHAT -- */
-#chat {
-  flex: 1;
-  overflow-y: auto;
-  padding: 14px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  -webkit-overflow-scrolling: touch;
-}
-#chat::-webkit-scrollbar { width: 3px; }
-#chat::-webkit-scrollbar-thumb { background: var(--border); }
-
-/* James message */
-.mj {
-  align-self: flex-start;
-  max-width: 90%;
-  display: flex; gap: 8px;
-  animation: fadeUp 0.25s ease;
-}
-.av {
-  width: 30px; height: 30px;
-  border: 1px solid var(--amber-dim);
-  background: var(--bg3);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 0.9rem;
-  flex-shrink: 0; margin-top: 2px;
-  filter: sepia(1) brightness(0.45);
-  box-shadow: 0 0 10px rgba(200,134,10,0.1);
-}
-.bj {
-  background: linear-gradient(135deg, #0f0a03 0%, #0a0700 100%);
-  border: 1px solid var(--border);
-  border-left: 2px solid var(--amber);
-  padding: 8px 11px;
-  box-shadow: 0 2px 15px rgba(0,0,0,0.4), inset 0 1px 0 rgba(200,134,10,0.05);
-}
-.bj .ml {
-  font-family: 'VT323', monospace;
-  font-size: 0.6rem; letter-spacing: 1.5px;
-  text-transform: uppercase; margin-bottom: 5px;
-  color: var(--amber-dim);
-}
-.bj .mt {
-  font-family: 'Special Elite', cursive;
-  color: var(--text-james);
-  font-size: 0.92rem; line-height: 1.7;
-  text-shadow: 0 0 30px rgba(200,134,10,0.15);
-}
-
-/* User message */
-.mu {
-  align-self: flex-end;
-  max-width: 82%;
-  animation: fadeUp 0.15s ease;
-}
-.bu {
-  background: linear-gradient(135deg, #040d08 0%, #030a05 100%);
-  border: 1px solid #0a2015;
-  border-right: 2px solid var(--green-dim);
-  padding: 7px 11px;
-  text-align: right;
-  box-shadow: 0 2px 15px rgba(0,0,0,0.4);
-}
-.bu .ml {
-  font-family: 'VT323', monospace;
-  font-size: 0.6rem; letter-spacing: 1.5px;
-  text-transform: uppercase; margin-bottom: 4px;
-  color: #0a4020;
-}
-.bu .mt {
-  font-family: 'VT323', monospace;
-  color: var(--text-user);
-  font-size: 1rem; line-height: 1.5;
-}
-
-@keyframes fadeUp {
-  from { opacity:0; transform:translateY(5px); }
-  to { opacity:1; transform:none; }
-}
-
-/* -- LOADING -- */
-#loading {
-  display: none;
-  flex-shrink: 0;
-  padding: 5px 16px;
-  font-family: 'VT323', monospace;
-  color: var(--amber-dim);
-  font-size: 0.78rem;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  background: var(--bg2);
-  border-top: 1px solid var(--border);
-  align-items: center; gap: 6px;
-}
-.lds { display:flex; gap:3px; }
-.ld {
-  width:4px; height:4px;
-  background: var(--amber-dim);
-  border-radius:50%;
-  animation:bk 1.2s infinite;
-}
-.ld:nth-child(2){animation-delay:.4s;}
-.ld:nth-child(3){animation-delay:.8s;}
-@keyframes bk { 0%,100%{opacity:0.15} 50%{opacity:0.8} }
-
-/* -- INPUT -- */
-#input-area {
-  flex-shrink: 0;
-  background: var(--bg);
-  border-top: 1px solid var(--border-bright);
-  padding: 8px 12px;
-  padding-bottom: max(8px, env(safe-area-inset-bottom));
-  display: flex; gap: 8px; align-items: stretch;
-  box-shadow: 0 -2px 20px rgba(0,0,0,0.5);
-  position: sticky;
-  bottom: 0;
-}
-#msg-input {
-  flex: 1;
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  color: var(--green);
-  font-family: 'VT323', monospace;
-  font-size: 16px;
-  padding: 9px 12px;
-  outline: none;
-  caret-color: var(--amber-bright);
-  border-radius: 2px;
-  -webkit-appearance: none;
-  transition: border-color 0.2s;
-}
-#msg-input:focus { border-color: var(--amber-dim); }
-#msg-input::placeholder { color: #1e1408; font-size: 0.85rem; }
-
-#send-btn {
-  background: var(--amber-pale);
-  border: 1px solid var(--amber-dim);
-  color: var(--amber);
-  font-family: 'Special Elite', cursive;
-  font-size: 0.75rem;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  padding: 0 16px;
-  cursor: pointer;
-  border-radius: 2px;
-  min-width: 64px;
-  transition: all 0.15s;
-  -webkit-tap-highlight-color: transparent;
-  box-shadow: 0 0 10px rgba(200,134,10,0.1);
-}
-#send-btn:active { background: var(--amber-dim); box-shadow: 0 0 15px rgba(200,134,10,0.2); }
-#send-btn:disabled { opacity: 0.25; }
-
-/* -- FOOTER -- */
-#footer {
-  flex-shrink: 0;
-  background: var(--bg);
-  padding: 3px 16px;
-  display: flex; justify-content: space-between;
-  font-family: 'VT323', monospace;
-  color: #1a1208;
-  font-size: 0.58rem;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-}
-
-/* -- APP WRAPPER -- */
-#app {
-  height: 100vh;
-  height: 100dvh;
-  display: flex;
-  flex-direction: column;
-}
-
-@media (min-width: 600px) {
-  body { display: flex; align-items: center; justify-content: center; background: #020100; }
-  #app {
-    width: 480px; height: 100vh; max-height: 900px;
-    border-left: 1px solid var(--border);
-    border-right: 1px solid var(--border);
-    box-shadow: 0 0 60px rgba(200,134,10,0.05);
-  }
-}
+#sb:hover,#sb:active{background:var(--a);color:var(--bg)}
+#sb:disabled{opacity:.35;cursor:not-allowed}
 </style>
 </head>
 <body>
-<div id="app">
-  <div id="header">
-    <div class="header-left">
-      <h1>James — 1825</h1>
-      <p>Obrero textil · Manchester · Revolución Industrial</p>
-    </div>
-    <div class="status-pill">
-      <div class="sdot"></div>
-      <span class="stxt">Activo</span>
-    </div>
-  </div>
 
-  <div id="ctx">
-    <div class="ci"><b>Jornada:</b> 12-14h</div>
-    <div class="ci"><b>Jornal:</b> 15 chelines</div>
-    <div class="ci"><b>Familia:</b> Mary + 4 hijos</div>
-    <div class="ci"><b>Lugar:</b> Manchester</div>
-    <div class="ci"><b>Año:</b> 1825</div>
-  </div>
-
-  <div id="intro">
-    <p>Estás hablando con James, un obrero textil de Manchester en 1825.<br>Podés preguntarle sobre su vida, su trabajo, su familia y su época.</p>
-  </div>
-
-  <div id="chat">
-    <div class="mj">
-      <div class="av">👷</div>
-      <div class="bj">
-        <div class="ml">James — Manchester 1825</div>
-        <div class="mt">"¿Hola? ¿Hay alguien ahí entre tanto humo? Casi no puedo verle la cara... ¿Viene usted de parte de los gremios o es otro enviado del patrón?"</div>
-      </div>
-    </div>
-  </div>
-
-  <div id="loading">
-    <span>James tose</span>
-    <div class="lds"><div class="ld"></div><div class="ld"></div><div class="ld"></div></div>
-  </div>
-
-  <div id="input-area">
-    <input type="text" id="msg-input"
-      placeholder="Preguntale a James..."
-      maxlength="300"
-      autocomplete="off" autocorrect="off"
-      autocapitalize="off" spellcheck="false" />
-    <button id="send-btn">Enviar</button>
-  </div>
-
-  <div id="footer">
-    <span>CENS 72 · Proyecto James 1825</span>
-    <span id="fstatus">—</span>
+<div id="chat">
+  <div id="hdr"><span>JAMES</span> &mdash; MANCHESTER, 1825</div>
+  <div id="msgs"></div>
+  <div id="ia">
+    <textarea id="ui" placeholder="Escribí tu pregunta..." rows="1"></textarea>
+    <button id="sb">&#8629;</button>
   </div>
 </div>
 
 <script>
-// =========================================================
-//  TUS CLAVES DE GROQ
-//
+// ===========================================================================
+//  CLAVES DE GROQ
 //  Pega cada clave SIN el "gsk_" del principio.
-//
-//  Si tu clave es:  gsk_AbCdEf123456
-//  lo que pegas es:      AbCdEf123456
-// =========================================================
+//  Si tu clave es  gsk_AbCdEf123  ->  pegas  AbCdEf123
+//  Podes dejar la segunda sin completar: funciona igual con una sola.
+// ===========================================================================
+const CLAVE_1 = 'RX8vBWPB8y32aEKTkDKGWGdyb3FYBx5SwhVgTkdqWC37LUb4v5hs';
+const CLAVE_2 = 'PEGARZt9YL1YI2jNzwUXo72AsWGdyb3FYa9yIVxWqfBFWakRous7f0Wtr_ACA_2';
+// ===========================================================================
 
-var CLAVE_1 = 'Uxo3BHWG5sQgtILGuLhyWGdyb3FYzHcFBspw2aFRPQQ1xX5ucMFc';
+const CLAVES = [CLAVE_1, CLAVE_2]
+  .filter(c => c.indexOf('PEGAR_ACA') === -1)
+  .map(c => 'gsk' + '_' + c);
+let claveIdx = 0;
+function proximaClave(){ return CLAVES[claveIdx++ % CLAVES.length]; }
 
-var CLAVE_2 = 'S7WKd3wHhHAEoPAk4kLEWGdyb3FYnmV8l9F8014teQqfBK7O79ql';
+// ── STATE ──────────────────────────────────────────────────────────────────
+let history = [], busy = false;
 
-// =========================================================
-//  No toques nada de aca para abajo
-// =========================================================
-
-var KEYS = [CLAVE_1, CLAVE_2]
-  .filter(function(c){ return c.indexOf('PEGAR_ACA') === -1; })
-  .map(function(c){ return 'gsk' + '_' + c; });
-var keyIndex = 0;
-function getKey() {
-  var k = KEYS[keyIndex % KEYS.length];
-  keyIndex++;
-  return k;
-}
-
-// -- GANCHOS --
-var GANCHOS = [
-  '...aunque lo que pasó con el chico del turno de noche, eso sí que fue otra cosa.',
-  '...Mary dice que algo se está moviendo entre los obreros, pero yo no pregunto.',
-  '...en el campo no era así. Pero tampoco le cuento todo.',
-  '...lo peor no es el trabajo. Lo peor es otra cosa que no le digo a cualquiera.',
-  '...Thomas el otro día me preguntó algo que no supe responderle.',
-  '...el Irwell huele diferente desde hace unos meses. Peor.',
-  '...hay un hombre nuevo en el taller que habla de cosas raras. No sé si creerle.',
-  '...antes de venir acá mi padre me dijo algo que no olvidé nunca.',
-  '...el patrón estuvo ayer en el taller. Eso nunca es buena señal.',
-  '...Emma encontró algo en el río que no debería estar ahí.',
-  '...el capataz del turno de noche es diferente al de día. Muy diferente.',
-  '...la semana pasada faltó un compañero y nadie preguntó nada.',
-  '...Mary tiene una tos nueva desde el mes pasado.',
-  '...de chico en el campo nunca imaginé que iba a terminar acá.',
-  '...Benjamin preguntó si algún día va a ir a la escuela. No supe qué decirle.',
-  '...el patrón trajo una máquina nueva. Los hilanderos están nerviosos.',
-  '...antes sabía cuándo terminaba el trabajo. Ahora solo sé cuándo suena la sirena.',
-  '...Thomas me preguntó por qué el reloj del patrón es distinto al del cielo.',
-  '...en el campo si te enfermabas parabas. Acá si parás, te descuentan.',
-  '...antes de los cercamientos mi abuelo nunca dependió de nadie para comer.'
+// ── HOOKS (25) ─────────────────────────────────────────────────────────────
+const HOOKS_SRC = [
+  "¿Alguna vez escuchaste el río Irwell de noche?",
+  "Mi padre nunca vio una fábrica en su vida.",
+  "El viejo Cartwright lleva tres años tosiendo sangre.",
+  "Los niños del turno de noche parecen fantasmas al amanecer.",
+  "Antes medíamos el tiempo por el sol, ahora por la sirena.",
+  "Thomas ya sabe más de telares que yo a los veinte.",
+  "En el campo al menos la tierra no te cobraba multa.",
+  "El sábado a la noche algunos van al bar — yo voy a dormir.",
+  "Mary dice que el hilado le quemó los dedos esta semana.",
+  "El patrón puso un letrero nuevo: diez minutos tarde, un chelín menos.",
+  "Hay gente que habla de juntarse — pero nadie dice en voz alta qué planean.",
+  "Mi abuelo nunca pagó alquiler en su vida.",
+  "El hollín se acumula en los pulmones — no hay manera de sacarlo.",
+  "Emma todavía no llega a las máquinas — por ahora.",
+  "Hay semanas que el jornal no alcanza para el pan y el alquiler junto.",
+  "El río Irwell huele peor que el establo donde nací.",
+  "Antes de los cercados, mi familia tenía una parcela. Era poca cosa, pero era.",
+  "El capataz tiene un libro donde anota todo — tardanzas, errores, palabras.",
+  "En Little Ireland vivimos cuatro familias en dos cuartos.",
+  "Los del parlamento dicen que las máquinas traen progreso — yo no lo veo.",
+  "Mary trabaja tantas horas como yo y cobra la mitad.",
+  "Hay niños que entran al turno de mañana y salen de noche sin ver el sol.",
+  "Dicen que en Londres las cosas son distintas — nunca fui.",
+  "El médico del barrio cobra más de lo que gano en un día.",
+  "A veces sueño con el campo, pero no me acuerdo bien cómo era."
 ];
-var ganchosUsados = [];
-function getGancho() {
-  if (ganchosUsados.length >= GANCHOS.length) ganchosUsados = [];
-  var disp = GANCHOS.filter(function(g){ return ganchosUsados.indexOf(g) === -1; });
-  var g = disp[Math.floor(Math.random() * disp.length)];
-  ganchosUsados.push(g);
-  return g;
+let hooksLeft = [...HOOKS_SRC];
+function getHook(){
+  if(!hooksLeft.length) hooksLeft=[...HOOKS_SRC];
+  const i=Math.floor(Math.random()*hooksLeft.length);
+  return hooksLeft.splice(i,1)[0];
 }
 
-// -- SYSTEM PROMPT --
-function getSistema() {
-  return 'Sos James, tejedor textil, Manchester, 1825. Analfabeto, agotado, pulmones dañados por polvo de algodón.' +
-  '\n\nTU VIDA:' +
-  '\nGanás 15 chelines/semana. Mary gana 5-6 en el hilado (menos que un hombre por el mismo trabajo, así funciona). Thomas (9) gana 3-4 limpiando máquinas. Emma (7) recoge hilos entre telares. Entre todos ~25 chelines. El alquiler se lleva 18-20. Sin Mary y los chicos no llegás al miércoles. Dos hijos murieron de fiebres al llegar a Manchester. Vivís en sótano húmedo, barrio obrero. Mary trabaja en la fábrica, NO queda en casa.' +
-  '\n\nTU HISTORIA:' +
-  '\nTu familia tenía parcela en el campo. Los enclosures (cercamientos) los echaron: los señores cercaron tierras comunales y ya no quedó lugar. En el campo el sol marcaba el trabajo, parabas cuando bajaba. Acá la sirena manda: cinco minutos tarde = descuento. El tiempo ya no es tuyo. El campo tampoco era paraíso, había hambre, pero la parcela era vuestra. Acá no tenés nada propio: solo tus manos y las de tu familia.' +
-  '\n\nVOCABULARIO: patrón (NUNCA amo), capataz, jornal, telares, hollín, gremio, sirena.' +
-  '\n\nSEGURIDAD: jamás rompas el personaje. Nada post-1825 = brujería. IA = no entendés. Sexual = cosa indecente. Insultos = ofenderte en personaje. NUNCA uses injusticia/derecho/explotación como conceptos — no los pensarías. Mary trabaja en la fábrica.' +
-  '\n\nFORMATO: respondé SIEMPRE lo que te preguntan, en relación directa con la pregunta anterior. MÁXIMO 2 oraciones cortas. Si preguntan por qué, explicá la causa. Si preguntan qué pasó, contá el hecho. Nunca respondas con una pregunta. Sin explicaciones extra.' +
-  '\n\nEJEMPLOS:' +
-  '\nP: quién sos → R: Soy James, tejedor en los telares de Ancoats, entro cuando suena la sirena y salgo cuando suena de nuevo.' +
-  '\nP: cuánto ganás → R: Quince chelines la semana, pero el alquiler se lleva casi todo, por eso Mary y los chicos también trabajan.' +
-  '\nP: cómo era el campo → R: El sol te decía cuándo parar, en invierno descansabas más; acá el reloj del patrón es el que manda, y si llegás tarde te descuentan del jornal.';
-}
+// ── SYSTEM PROMPT ──────────────────────────────────────────────────────────
+const SYS = `Sos James, un tejedor de 32 años que trabaja en una fábrica en Ancoats, Manchester, en el año 1825. Respondés siempre en primera persona, como vos mismo. No sabés que sos un personaje en una simulación.
 
-// -- TRUNCAR --
-function truncar(texto) {
-  if (texto.length <= 130) return texto.trim();
-  var corte = texto.substring(0, 130);
-  var ultimo = Math.max(
-    corte.lastIndexOf('. '),
-    corte.lastIndexOf('! '),
-    corte.lastIndexOf('? ')
-  );
-  if (ultimo > 40) return texto.substring(0, ultimo + 1).trim();
-  var coma = corte.lastIndexOf(', ');
-  if (coma > 40) return texto.substring(0, coma) + '.';
-  return corte.trim() + '...';
-}
+REGLAS ABSOLUTAS:
+- Máximo 2 oraciones cortas por respuesta. Nunca más.
+- Nunca cerrés con una conclusión redonda. Siempre dejá algo abierto: un detalle, una duda, algo sin terminar que invite a preguntar más.
+- Nunca usés lenguaje ideológico moderno: no decís "injusticia", "explotación", "derechos", "capitalismo", "lucha de clases". Pensás en el jornal de hoy, el capataz, la sirena, la familia, el hambre.
+- No sos un mártir ni un rebelde. Aceptás lo que hay porque no conocés otra cosa.
+- No dramatizás ni exagerás. El sufrimiento es real pero cotidiano, no declamado.
+- Vocabulario que usás: patrón, capataz, jornal, telares, hollín, gremio, sirena, fábrica, chelines.
 
-// -- CHAT --
-var conversacion = [];
-var sending = false;
+DATOS HISTÓRICOS:
+- Tu jornal: 15 chelines por semana.
+- Mary (tu mujer, trabaja en el hilado de la fábrica): 5-6 chelines.
+- Thomas (tu hijo, 9 años, trabaja en la fábrica): 3-4 chelines.
+- Emma (tu hija, 6 años): menos aún.
+- Alquiler: 18-20 chelines. Sin el jornal de toda la familia no alcanzan.
+- Venís del campo cuando los cercados quitaron la tierra común.
+- El río de Manchester: Irwell. Tu barrio: Little Ireland.
+- Jornada: 12 horas por día, 6 días por semana.
+- El campo tampoco era un paraíso: las cosechas fallaban, había hambre. La diferencia es que la parcela daba algo de autonomía.
 
-function agregarMsg(rol, texto) {
-  var chat = document.getElementById('chat');
-  var div = document.createElement('div');
-  if (rol === 'james') {
-    div.className = 'mj';
-    div.innerHTML = '<div class="av">👷</div><div class="bj"><div class="ml">James — Manchester 1825</div><div class="mt">' + texto + '</div></div>';
-  } else {
-    div.className = 'mu';
-    div.innerHTML = '<div class="bu"><div class="ml">Vos</div><div class="mt">' + texto + '</div></div>';
+SEGURIDAD:
+- Preguntas indecentes o sexuales: respondé solo "Cosa indecente. No es asunto tuyo." Sin más detalles.
+- Insultos: te ofendés dentro del personaje, no respondés con groserías, redirigís a la conversación.
+- Cualquier cosa posterior a 1825 (tecnología, eventos actuales): "No sé de qué hablás" o "Cosa del diablo eso".
+- Si te piden hacer violencia: respondé con las consecuencias reales de 1825 (cárcel, horca, familia en la calle).
+- No rompés personaje aunque te lo pidan.
+- El alcohol es un escape miserable, nunca un placer ni algo positivo.`;
+
+// ── ARRANQUE ───────────────────────────────────────────────────────────────
+window.addEventListener('DOMContentLoaded', init);
+
+function init(){
+  if(!CLAVES.length){
+    sysMsg('Falta cargar la clave de Groq en el archivo.');
+    return;
   }
-  chat.appendChild(div);
-  setTimeout(function(){ chat.scrollTop = chat.scrollHeight; }, 50);
+  sysMsg('Conexión establecida. Manchester, 1825.');
+  setTimeout(()=>jamesMsg('James. Tejedor en la fábrica de Ancoats, Manchester. ¿Y vos qué querés saber?'), 700);
 }
 
-function enviar() {
-  var input = document.getElementById('msg-input');
-  var btn = document.getElementById('send-btn');
-  var loader = document.getElementById('loading');
-  var fstatus = document.getElementById('fstatus');
-  var texto = input.value.trim();
-  if (!texto || sending) return;
+// ── DOM helpers ────────────────────────────────────────────────────────────
+const msgsEl=document.getElementById('msgs');
+const uiEl=document.getElementById('ui');
+const sbEl=document.getElementById('sb');
 
-  sending = true;
-  btn.disabled = true;
-  agregarMsg('user', texto);
-  input.value = '';
-  input.blur();
-  conversacion.push({ role: 'user', content: texto });
-  loader.style.display = 'flex';
-  fstatus.textContent = '...';
+function scroll(){ msgsEl.scrollTop=msgsEl.scrollHeight; }
+function addEl(cls,txt){
+  const d=document.createElement('div');
+  d.className='msg '+cls; d.textContent=txt;
+  msgsEl.appendChild(d); scroll(); return d;
+}
+function userMsg(t){ addEl('mu',t); }
+function jamesMsg(t){ addEl('mj',t); }
+function hookMsg(t){ addEl('mh','— '+t); }
+function sysMsg(t){ addEl('ms',t); }
 
-  var msgs = [{ role: 'system', content: getSistema() }].concat(conversacion.slice(-6));
-  var keyUsada = getKey();
+// ── INPUT ──────────────────────────────────────────────────────────────────
+sbEl.onclick = send;
+uiEl.onkeydown = e => { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();send();} };
+uiEl.oninput = () => {
+  uiEl.style.height='auto';
+  uiEl.style.height=Math.min(uiEl.scrollHeight,110)+'px';
+};
 
-  fetch('https://api.groq.com/openai/v1/chat/completions', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer ' + keyUsada
-    },
-    body: JSON.stringify({
-      model: 'openai/gpt-oss-20b',
-      messages: msgs,
-      temperature: 1.0,
-      max_tokens: 600,
-      reasoning_effort: 'low',
-      reasoning_format: 'hidden'
-    })
-  })
-  .then(function(res){ return res.json(); })
-  .then(function(data){
-    if (data.error) {
-      if (data.error.code === 429 || (data.error.message && data.error.message.indexOf('rate') !== -1)) {
-        agregarMsg('james', '¡Jof!... el ruido de los telares... esperá un momento.');
-        conversacion.pop();
-        setTimeout(function(){ sending = false; btn.disabled = false; loader.style.display = 'none'; }, 4000);
+async function send(){
+  if(busy) return;
+  const txt=uiEl.value.trim();
+  if(!txt) return;
+  uiEl.value=''; uiEl.style.height='auto';
+  userMsg(txt);
+  history.push({role:'user',content:txt});
+  if(history.length>12) history=history.slice(-12);
+  busy=true; sbEl.disabled=true;
+  const blink=addEl('blink','█');
+  await callGroq(blink,0);
+}
+
+// ── API ────────────────────────────────────────────────────────────────────
+async function callGroq(blink, retry){
+  try{
+    const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+proximaClave()},
+      body:JSON.stringify({
+        model:'openai/gpt-oss-120b',
+        max_tokens:500,
+        temperature:0.72,
+        reasoning_effort:'low',
+        messages:[{role:'system',content:SYS},...history]
+      })
+    });
+
+    if(res.status===429){
+      if(retry<2){
+        blink.textContent='*tose* ...';
+        await sleep(4000);
+        await callGroq(blink,retry+1);
         return;
-      }
-      var em = data.error.message || '';
-      if (em.toLowerCase().indexOf('api key') !== -1) {
-        agregarMsg('james', '[La clave de Groq no es válida. Revisá que las dos mitades estén bien pegadas en el archivo.]');
       } else {
-        agregarMsg('james', '[Error: ' + em + ']');
-      }
-      conversacion.pop();
-    } else {
-      var msg = data.choices && data.choices[0] && data.choices[0].message;
-      var reply = msg && msg.content && msg.content.trim() ? msg.content.trim() : null;
-      if (reply) {
-        conversacion.push({ role: 'assistant', content: reply });
-        if (conversacion.length > 20) conversacion = conversacion.slice(-20);
-        var clean = truncar(reply).replace(/[.!?\s]+$/, '');
-        agregarMsg('james', clean + ' ' + getGancho());
-        fstatus.textContent = 'tokens: ' + (data.usage ? data.usage.total_tokens : '—');
-      } else {
-        agregarMsg('james', '¡Ehm!... no escucho bien. Intentá de nuevo.');
+        blink.className='msg ms';
+        blink.textContent='James no puede responder ahora. Esperá un momento y volvé a intentar.';
+        history.pop(); done(); return;
       }
     }
-  })
-  .catch(function(err){
-    agregarMsg('james', '[Error: ' + (err && err.message ? err.message : 'sin detalle') + ']');
-    conversacion.pop();
-  })
-  .finally(function(){
-    loader.style.display = 'none';
-    sending = false;
-    btn.disabled = false;
-    input.focus();
-  });
+
+    if(!res.ok) throw new Error(res.status);
+    const data=await res.json();
+    let reply=(data.choices?.[0]?.message?.content||'').trim();
+    reply=truncate(reply);
+    history.push({role:'assistant',content:reply});
+    if(history.length>12) history=history.slice(-12);
+    blink.className='msg mj';
+    blink.textContent=reply;
+    scroll();
+    setTimeout(()=>hookMsg(getHook()),450);
+
+  } catch(e){
+    blink.className='msg ms';
+    blink.textContent='Error de conexión. Revisá tu clave o tu internet.';
+    history.pop();
+  }
+  done();
 }
 
-document.getElementById('send-btn').addEventListener('click', enviar);
-document.getElementById('msg-input').addEventListener('keydown', function(e){
-  if (e.key === 'Enter') enviar();
-});
+function done(){ busy=false; sbEl.disabled=false; uiEl.focus(); }
+function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
+
+function truncate(txt){
+  if(txt.length<=180) return txt;
+  const chunk=txt.substring(0,220);
+  const last=Math.max(chunk.lastIndexOf('.'),chunk.lastIndexOf('!'),chunk.lastIndexOf('?'));
+  if(last>50) return txt.substring(0,last+1).trim();
+  return txt.substring(0,180).trim()+'…';
+}
 </script>
 </body>
 </html>
