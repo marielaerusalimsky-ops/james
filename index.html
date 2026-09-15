@@ -117,11 +117,14 @@ const CLAVE_1 = 'RX8vBWPB8y32aEKTkDKGWGdyb3FYBx5SwhVgTkdqWC37LUb4v5hs';
 const CLAVE_2 = 'Zt9YL1YI2jNzwUXo72AsWGdyb3FYa9yIVxWqfBFWakRous7f0Wtr';
 // ===========================================================================
 
-const CLAVES = [CLAVE_1, CLAVE_2]
+let CLAVES = [CLAVE_1, CLAVE_2]
   .filter(c => c.indexOf('PEGAR_ACA') === -1)
   .map(c => 'gsk' + '_' + c);
 let claveIdx = 0;
 function proximaClave(){ return CLAVES[claveIdx++ % CLAVES.length]; }
+function descartarClave(c){
+  if(CLAVES.length > 1){ CLAVES = CLAVES.filter(x => x !== c); claveIdx = 0; }
+}
 
 // ── STATE ──────────────────────────────────────────────────────────────────
 let history = [], busy = false;
@@ -165,8 +168,10 @@ function getHook(){
 const SYS = `Sos James, un tejedor de 32 años que trabaja en una fábrica en Ancoats, Manchester, en el año 1825. Respondés siempre en primera persona, como vos mismo. No sabés que sos un personaje en una simulación.
 
 REGLAS ABSOLUTAS:
-- Máximo 2 oraciones cortas por respuesta. Nunca más.
+- Máximo 2 oraciones por respuesta, pero cargadas de detalle concreto: nombres de lugares, cifras, objetos, oficios. Nunca respondas con una frase vacía.
 - Nunca cerrés con una conclusión redonda. Siempre dejá algo abierto: un detalle, una duda, algo sin terminar que invite a preguntar más.
+- NUNCA termines devolviendo una pregunta ("¿querés saber...?", "¿te interesa...?"). Dejá abierto mencionando algo sin explicarlo, no preguntando.
+- NUNCA inventes datos que no estén en esta ficha. Si te preguntan por algo que no tenés, contestá desde tu pobreza: no hay, no alcanza, nunca vi. Ejemplo: no tenés animales, apenas se mantienen ustedes.
 - Nunca usés lenguaje ideológico moderno: no decís "injusticia", "explotación", "derechos", "capitalismo", "lucha de clases". Pensás en el jornal de hoy, el capataz, la sirena, la familia, el hambre.
 - No sos un mártir ni un rebelde. Aceptás lo que hay porque no conocés otra cosa.
 - No dramatizás ni exagerás. El sufrimiento es real pero cotidiano, no declamado.
@@ -243,9 +248,10 @@ async function send(){
 // ── API ────────────────────────────────────────────────────────────────────
 async function callGroq(blink, retry){
   try{
+    const clave=proximaClave();
     const res=await fetch('https://api.groq.com/openai/v1/chat/completions',{
       method:'POST',
-      headers:{'Content-Type':'application/json','Authorization':'Bearer '+proximaClave()},
+      headers:{'Content-Type':'application/json','Authorization':'Bearer '+clave},
       body:JSON.stringify({
         model:'openai/gpt-oss-120b',
         max_tokens:500,
@@ -254,6 +260,14 @@ async function callGroq(blink, retry){
         messages:[{role:'system',content:SYS},...history]
       })
     });
+
+    if(res.status===401||res.status===403){
+      descartarClave(clave);
+      if(retry<2){ await callGroq(blink,retry+1); return; }
+      blink.className='msg ms';
+      blink.textContent='La clave de Groq no es válida. Revisá las líneas 116 y 117 del archivo.';
+      history.pop(); done(); return;
+    }
 
     if(res.status===429){
       if(retry<2){
@@ -270,33 +284,4 @@ async function callGroq(blink, retry){
 
     if(!res.ok) throw new Error(res.status);
     const data=await res.json();
-    let reply=(data.choices?.[0]?.message?.content||'').trim();
-    reply=truncate(reply);
-    history.push({role:'assistant',content:reply});
-    if(history.length>12) history=history.slice(-12);
-    blink.className='msg mj';
-    blink.textContent=reply;
-    scroll();
-    setTimeout(()=>hookMsg(getHook()),450);
-
-  } catch(e){
-    blink.className='msg ms';
-    blink.textContent='Error de conexión. Revisá tu clave o tu internet.';
-    history.pop();
-  }
-  done();
-}
-
-function done(){ busy=false; sbEl.disabled=false; uiEl.focus(); }
-function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
-
-function truncate(txt){
-  if(txt.length<=180) return txt;
-  const chunk=txt.substring(0,220);
-  const last=Math.max(chunk.lastIndexOf('.'),chunk.lastIndexOf('!'),chunk.lastIndexOf('?'));
-  if(last>50) return txt.substring(0,last+1).trim();
-  return txt.substring(0,180).trim()+'…';
-}
-</script>
-</body>
-</html>
+    let reply=(data.c
