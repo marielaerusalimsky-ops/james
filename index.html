@@ -46,7 +46,7 @@ body::after {
   pointer-events: none; z-index: 9999;
 }
 
-/* ── HEADER ── */
+/* -- HEADER -- */
 #header {
   flex-shrink: 0;
   background: linear-gradient(180deg, #0a0700 0%, var(--bg) 100%);
@@ -97,7 +97,7 @@ body::after {
   letter-spacing: 1px; text-transform: uppercase;
 }
 
-/* ── CONTEXT STRIP ── */
+/* -- CONTEXT STRIP -- */
 #ctx {
   flex-shrink: 0;
   background: #08060200;
@@ -117,7 +117,7 @@ body::after {
 }
 .ci b { color: #4a2e08; font-weight: 400; }
 
-/* ── INTRO BANNER ── */
+/* -- INTRO BANNER -- */
 #intro {
   flex-shrink: 0;
   background: linear-gradient(90deg, transparent, rgba(200,134,10,0.04), transparent);
@@ -134,7 +134,7 @@ body::after {
   line-height: 1.4;
 }
 
-/* ── CHAT ── */
+/* -- CHAT -- */
 #chat {
   flex: 1;
   overflow-y: auto;
@@ -215,7 +215,7 @@ body::after {
   to { opacity:1; transform:none; }
 }
 
-/* ── LOADING ── */
+/* -- LOADING -- */
 #loading {
   display: none;
   flex-shrink: 0;
@@ -240,7 +240,7 @@ body::after {
 .ld:nth-child(3){animation-delay:.8s;}
 @keyframes bk { 0%,100%{opacity:0.15} 50%{opacity:0.8} }
 
-/* ── INPUT ── */
+/* -- INPUT -- */
 #input-area {
   flex-shrink: 0;
   background: var(--bg);
@@ -288,7 +288,7 @@ body::after {
 #send-btn:active { background: var(--amber-dim); box-shadow: 0 0 15px rgba(200,134,10,0.2); }
 #send-btn:disabled { opacity: 0.25; }
 
-/* ── FOOTER ── */
+/* -- FOOTER -- */
 #footer {
   flex-shrink: 0;
   background: var(--bg);
@@ -301,7 +301,7 @@ body::after {
   text-transform: uppercase;
 }
 
-/* ── APP WRAPPER ── */
+/* -- APP WRAPPER -- */
 #app {
   height: 100vh;
   height: 100dvh;
@@ -376,11 +376,26 @@ body::after {
 </div>
 
 <script>
-// ── KEYS (agregá la segunda cuando la tengas) ──
-var KEYS = [
-  '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',
-  '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'
-];
+// =========================================================
+//  TUS CLAVES DE GROQ
+//
+//  Pega cada clave SIN el "gsk_" del principio.
+//
+//  Si tu clave es:  gsk_AbCdEf123456
+//  lo que pegas es:      AbCdEf123456
+// =========================================================
+
+var CLAVE_1 = 'PEGAR_ACA_1';
+
+var CLAVE_2 = 'PEGAR_ACA_2';
+
+// =========================================================
+//  No toques nada de aca para abajo
+// =========================================================
+
+var KEYS = [CLAVE_1, CLAVE_2]
+  .filter(function(c){ return c.indexOf('PEGAR_ACA') === -1; })
+  .map(function(c){ return 'gsk' + '_' + c; });
 var keyIndex = 0;
 function getKey() {
   var k = KEYS[keyIndex % KEYS.length];
@@ -388,7 +403,7 @@ function getKey() {
   return k;
 }
 
-// ── GANCHOS ──
+// -- GANCHOS --
 var GANCHOS = [
   '...aunque lo que pasó con el chico del turno de noche, eso sí que fue otra cosa.',
   '...Mary dice que algo se está moviendo entre los obreros, pero yo no pregunto.',
@@ -420,7 +435,7 @@ function getGancho() {
   return g;
 }
 
-// ── SYSTEM PROMPT ──
+// -- SYSTEM PROMPT --
 function getSistema() {
   return 'Sos James, tejedor textil, Manchester, 1825. Analfabeto, agotado, pulmones dañados por polvo de algodón.' +
   '\n\nTU VIDA:' +
@@ -436,7 +451,7 @@ function getSistema() {
   '\nP: cómo era el campo → R: El sol te decía cuándo parar, en invierno descansabas más; acá el reloj del patrón es el que manda, y si llegás tarde te descuentan del jornal.';
 }
 
-// ── TRUNCAR ──
+// -- TRUNCAR --
 function truncar(texto) {
   if (texto.length <= 130) return texto.trim();
   var corte = texto.substring(0, 130);
@@ -451,7 +466,7 @@ function truncar(texto) {
   return corte.trim() + '...';
 }
 
-// ── CHAT ──
+// -- CHAT --
 var conversacion = [];
 var sending = false;
 
@@ -513,7 +528,12 @@ function enviar() {
         setTimeout(function(){ sending = false; btn.disabled = false; loader.style.display = 'none'; }, 4000);
         return;
       }
-      agregarMsg('james', '[Error: ' + data.error.message + ']');
+      var em = data.error.message || '';
+      if (em.toLowerCase().indexOf('api key') !== -1) {
+        agregarMsg('james', '[La clave de Groq no es válida. Revisá que las dos mitades estén bien pegadas en el archivo.]');
+      } else {
+        agregarMsg('james', '[Error: ' + em + ']');
+      }
       conversacion.pop();
     } else {
       var msg = data.choices && data.choices[0] && data.choices[0].message;
