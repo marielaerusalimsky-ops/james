@@ -113,8 +113,8 @@ body::before{
 //  Si tu clave es  gsk_AbCdEf123  ->  pegas  AbCdEf123
 //  Podes dejar la segunda sin completar: funciona igual con una sola.
 // ===========================================================================
-const CLAVE_1 = 'ANN8nMuVHMHOfD967zZvWGdyb3FYdzOSb3tB8r8aMryKqN58jyQn';
-const CLAVE_2 = 'a8ZqvDOiXVLcyPtT8zQlWGdyb3FYnj04w5fnfFEGz7XxoYIwlP4V';
+const CLAVE_1 = 'PEGAR_ACA_1';
+const CLAVE_2 = 'PEGAR_ACA_2';
 // ===========================================================================
 
 let CLAVES = [CLAVE_1, CLAVE_2]
@@ -310,4 +310,11 @@ function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 function truncate(txt){
   if(txt.length<=240) return txt;
   const chunk=txt.substring(0,260);
-  const last=Math.max(chunk.lastI
+  const last=Math.max(chunk.lastIndexOf('.'),chunk.lastIndexOf('!'),chunk.lastIndexOf('?'));
+  if(last>50) return txt.substring(0,last+1).trim();
+  const sp=chunk.lastIndexOf(' ');
+  return txt.substring(0,sp>50?sp:240).trim()+'…';
+}
+</script>
+</body>
+</html>
