@@ -98,7 +98,7 @@ body::before{
 <body>
 
 <div id="chat">
-  <div id="hdr"><span>JAMES</span> &mdash; MANCHESTER, 1825</div>
+  <div id="hdr"><span>JAMES</span> &mdash; MANCHESTER, 1825 <small id="ver" style="opacity:.5;font-size:.7em"></small></div>
   <div id="msgs"></div>
   <div id="ia">
     <textarea id="ui" placeholder="Escribí tu pregunta..." rows="1"></textarea>
@@ -113,8 +113,8 @@ body::before{
 //  Si tu clave es  gsk_AbCdEf123  ->  pegas  AbCdEf123
 //  Podes dejar la segunda sin completar: funciona igual con una sola.
 // ===========================================================================
-const CLAVE_1 = 'PEGAR_ACA_1';
-const CLAVE_2 = 'PEGAR_ACA_2';
+const CLAVE_1 = 'ANN8nMuVHMHOfD967zZvWGdyb3FYdzOSb3tB8r8aMryKqN58jyQn';
+const CLAVE_2 = 'a8ZqvDOiXVLcyPtT8zQlWGdyb3FYnj04w5fnfFEGz7XxoYIwlP4V';
 // ===========================================================================
 
 let CLAVES = [CLAVE_1, CLAVE_2]
@@ -128,6 +128,7 @@ function descartarClave(c){
 
 // ── STATE ──────────────────────────────────────────────────────────────────
 let history = [], busy = false;
+const VERSION = 'v5';
 
 // ── HOOKS (25) ─────────────────────────────────────────────────────────────
 const HOOKS_SRC = [
@@ -201,6 +202,7 @@ SEGURIDAD:
 window.addEventListener('DOMContentLoaded', init);
 
 function init(){
+  document.getElementById('ver').textContent = VERSION + ' / ' + CLAVES.length + ' clave' + (CLAVES.length===1?'':'s');
   if(!CLAVES.length){
     sysMsg('Falta cargar la clave de Groq en el archivo.');
     return;
@@ -266,7 +268,7 @@ async function callGroq(blink, retry){
       descartarClave(clave);
       if(retry<2){ await callGroq(blink,retry+1); return; }
       blink.className='msg ms';
-      blink.textContent='La clave de Groq no es válida. Revisá las líneas 116 y 117 del archivo.';
+      blink.textContent='Clave rechazada por Groq (HTTP '+res.status+'). Version '+VERSION+'.';
       history.pop(); done(); return;
     }
 
@@ -296,7 +298,7 @@ async function callGroq(blink, retry){
 
   } catch(e){
     blink.className='msg ms';
-    blink.textContent='Error de conexión. Revisá tu clave o tu internet.';
+    blink.textContent='Fallo de red: '+(e&&e.message?e.message:'sin detalle')+'. Version '+VERSION+'.';
     history.pop();
   }
   done();
@@ -308,11 +310,4 @@ function sleep(ms){ return new Promise(r=>setTimeout(r,ms)); }
 function truncate(txt){
   if(txt.length<=240) return txt;
   const chunk=txt.substring(0,260);
-  const last=Math.max(chunk.lastIndexOf('.'),chunk.lastIndexOf('!'),chunk.lastIndexOf('?'));
-  if(last>50) return txt.substring(0,last+1).trim();
-  const sp=chunk.lastIndexOf(' ');
-  return txt.substring(0,sp>50?sp:240).trim()+'…';
-}
-</script>
-</body>
-</html>
+  const last=Math.max(chunk.lastI
